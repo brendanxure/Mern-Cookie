@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs")
 const expressAsyncHandler = require("express-async-handler")
 const { responsecodes } = require("../constants/responsecode")
-const { findEmail, createUser } = require("../services/userServices")
+const { findEmail, createUser, generateLoginToken } = require("../services/userServices")
 
 //REgister user
 const Register = expressAsyncHandler(async(req, res) => {
@@ -31,9 +31,39 @@ const Register = expressAsyncHandler(async(req, res) => {
 
 
 //Login User
-const Login = async(req, res) => {
-    return res.status(responsecodes.SUCCESS).json({message: 'Login user'})
-}
+const Login = expressAsyncHandler(async(req, res) => {
+    const {email, password} = req.body
+    try {
+        if(!email || !password) {
+            return res.status(responsecodes.BAD_REQUEST).json('Please fill form Completely')
+        }
+
+        //if the email is registered
+        const registeredEmail = await findEmail(email)
+        if(!registeredEmail.success){
+            return res.status(responsecodes.NOT_FOUND).json(registeredEmail)
+        } 
+
+        //compare password with user password in the database
+        const registeredPassword = await bcrypt.compare(password, registeredEmail.password)
+        if(!registeredPassword){
+            return res.status(responsecodes.NOT_FOUND).json('Email and password not registered')
+        }
+
+        const regsiteredUser = registeredEmail
+        if(regsiteredUser && registeredPassword) {
+            //generate accessToken
+            generateLoginToken(res, regsiteredUser_id)
+            const {password, ...others} = regsiteredUser._doc
+            return res.status(responsecodes.SUCCESS).json(others)
+        } else {
+            return res.status(responsecodes.NOT_FOUND).json('User not found or not registered')
+        }
+
+    } catch (error) {
+        return res.status(responsecodes.INTERNAL_SERVER_ERROR).json(error)
+    }
+})
 
 //logout User
 const Logout = async(req, res)=> {

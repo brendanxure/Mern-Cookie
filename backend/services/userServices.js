@@ -1,3 +1,4 @@
+const jwt = require("jsonwebtoken")
 const { responsecodes } = require("../constants/responsecode")
 const User = require("../models/userModel")
 
@@ -26,8 +27,20 @@ const createUser = async (username, email, password)=> {
     }
 }
 
+const generateLoginToken = (res, id) => {
+    const accessToken = jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
+
+    res.cookie('jwt', accessToken, {
+        httpOnly: true,
+        secure: process.env !== "Development",
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000
+    })
+}
+
 
 module.exports = {
     findEmail,
-    createUser
+    createUser,
+    generateLoginToken
 }
