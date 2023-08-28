@@ -27,6 +27,31 @@ const createUser = async (username, email, password)=> {
     }
 }
 
+const findUserById = async(id) => {
+    try {
+        const user = await User.findById(id)
+        if(!user){
+            return {code: responsecodes.NOT_FOUND, success: false, data: 'No user Found'}
+        }
+        return {code: responsecodes.SUCCESS, success: true, data: user}
+    } catch (error) {
+        throw 'error occured while finding user by Id' + ' ' + error
+    }
+}
+
+const findUserByIdAndUpdate =async(id, data)=> {
+    try {
+        const user = await User.findByIdAndUpdate(id, {$set: data}, {new: true})
+        if(!user){
+            return {code: responsecodes.NOT_FOUND, success: false, data: 'No user found'}
+        }
+        await user.save()
+        return {code: responsecodes.SUCCESS, success: true, data: user}
+    } catch (error) {
+        throw 'error occured while updating users' + ' ' + error
+    }
+}
+
 const generateLoginToken = (res, id) => {
     const accessToken = jwt.sign({id}, process.env.JWT_SECRET, {expiresIn: "1d"})
 
@@ -42,5 +67,7 @@ const generateLoginToken = (res, id) => {
 module.exports = {
     findEmail,
     createUser,
+    findUserById,
+    findUserByIdAndUpdate,
     generateLoginToken
 }
