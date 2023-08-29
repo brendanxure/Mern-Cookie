@@ -23,7 +23,7 @@ const Register = expressAsyncHandler(async(req, res) => {
 
     const newUser = await createUser(username, email, hashpassword)
     
-    return res.status(responsecodes.SUCCESS).json(newUser)
+    return res.status(responsecodes.SUCCESS).json(newUser.data)
    } catch (error) {
         return res.status(responsecodes.INTERNAL_SERVER_ERROR).json(error)
    }
@@ -45,15 +45,17 @@ const Login = expressAsyncHandler(async(req, res) => {
         } 
 
         //compare password with user password in the database
-        const registeredPassword = await bcrypt.compare(password, registeredEmail.password)
+        const registeredPassword = await bcrypt.compare(password, registeredEmail.data.password)
+       
         if(!registeredPassword){
             return res.status(responsecodes.NOT_FOUND).json('Email and password not registered')
         }
 
-        const regsiteredUser = registeredEmail
+        const regsiteredUser = registeredEmail.data
         if(regsiteredUser && registeredPassword) {
             //generate accessToken
-            generateLoginToken(res, regsiteredUser_id)
+            generateLoginToken(res, regsiteredUser._id)
+          
             const {password, ...others} = regsiteredUser._doc
             return res.status(responsecodes.SUCCESS).json(others)
         } else {
@@ -61,7 +63,7 @@ const Login = expressAsyncHandler(async(req, res) => {
         }
 
     } catch (error) {
-        return res.status(responsecodes.INTERNAL_SERVER_ERROR).json(error)
+        return res.status(responsecodes.INTERNAL_SERVER_ERROR).json('error occured while logging in' + ' ' + error)
     }
 })
 
@@ -109,10 +111,11 @@ const UpdateProfile = async(req, res) => {
     if(!response.success){
         return res.status(response.code).json(response.data)
     }
-    return res.status(response.code).json(response.data)
+    const {password, ...otherdata} = response.data._doc
+    return res.status(response.code).json(otherdata)
 
     } catch (error) {
-    return res.status(responsecodes.INTERNAL_SERVER_ERROR).json(error)
+    return res.status(responsecodes.INTERNAL_SERVER_ERROR).json('error occured while updating user profile' + ' ' + error)
     }
 }
 

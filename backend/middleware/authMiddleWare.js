@@ -1,8 +1,7 @@
-import jwt from "jsonwebtoken";
-import expressAsyncHandler from "express-async-handler";
-import User from "../models/userModel";
-import { responsecodes } from "../constants/responsecode";
-import { json } from "express/lib/response";
+const jwt = require('jsonwebtoken')
+const expressAsyncHandler = require('express-async-handler')
+const User = require("../models/userModel") ;
+const { responsecodes } = require("../constants/responsecode");
 
 const validateToken = expressAsyncHandler(async(req, res, next)=> {
     let token;
