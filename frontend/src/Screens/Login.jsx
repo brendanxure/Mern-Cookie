@@ -11,7 +11,7 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log('submit')
+    console.log('submitted')
   }
 
   return (
